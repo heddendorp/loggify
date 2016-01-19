@@ -12,9 +12,10 @@ app.config(
     }
 );
 
-app.controller('AppController', function($http, $location) {
+app.controller('AppController', function($http, $location, $window, $mdToast) {
     var vm = this;
     vm.loaded = false;
+    vm.uploader = true;
     vm.readFile = readFile;
     vm.file = {
         index: [],
@@ -22,19 +23,34 @@ app.controller('AppController', function($http, $location) {
     };
     var url = $location.absUrl();
     if(url.indexOf('?log=')!=-1){
-        vm.hideForm = true;
         console.log('External log detected');
         var log = url.substr(url.indexOf('?log=')+5);
         console.log(log);
         $http.get('http://bochen415.info/loggify.php?url='+log).then(function (res) {
             console.log(res.data);
-            readFile({result: res.data});
+            readFile(res.data);
         });
     }
 
+    $window.Dropzone.options.upload = {
+        accept: function (file, done) {
+            console.log(file);
+            if(file.name.indexOf('.log')!= -1){
+                var reader = new FileReader;
+                reader.readAsText(file);
+                reader.onload = function () {
+                    readFile(reader.result);
+                }
+            } else {
+                $mdToast.showSimple("File isn't a logfile");
+                done("File isn't a logfile");
+            }
+        }
+    };
 
-    function readFile (target) {
-        var file = angular.copy(target.result);
+    function readFile (text) {
+        vm.uploader = false;
+        var file = angular.copy(text);
         var lines;
         lines = _.split(file, /\n/);
         var launcherline = lines[lines.length-2];
@@ -154,6 +170,8 @@ app.directive('onReadFile', function ($parse) {
                 };
 
                 reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
+                console.log((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
+                console.log(reader);
                 reader.file=(onChangeEvent.srcElement || onChangeEvent.target).files[0];
             });
         }

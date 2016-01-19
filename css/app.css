@@ -37,3 +37,6 @@ textarea{
 .warn{
     color: rgba(255, 193, 7, 1);
 }
+.dz-error-mark{
+    fill: #EF5350;
+}

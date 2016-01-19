@@ -13,6 +13,7 @@
     <!-- Angular Material style sheet -->
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0-rc7/angular-material.min.css">
     <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/dropzone.css">
 
 </head>
 <body ng-cloak ng-controller="AppController as vm" layout="column">
@@ -30,7 +31,9 @@
        <div ng-if="!vm.hideForm">
            <br><br>
            <h1>Select a Log-File for analysis</h1>
-           <input type="file" on-read-file="vm.readFile($fileContent)">
+           <form ng-if="vm.uploader" action="/file-upload"
+                 class="dropzone"
+                 id="upload"></form>
        </div>
     </div>
     <div layout="column" ng-if="vm.loaded">
@@ -117,6 +120,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
+<script src="js/dropzone.js"></script>
 
 <!-- Angular Material Library -->
 <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0-rc7/angular-material.min.js"></script>
