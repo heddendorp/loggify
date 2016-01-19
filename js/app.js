@@ -72,7 +72,9 @@ app.controller('AppController', function($http, $location, $window, $mdToast) {
             }
             sortedLines[launch].push(saveLine);
         });
+        var lineNum = 1;
         sortedLines[launch].forEach(function (lineObject) {
+            lineObject.text = lineNum+" "+lineObject.text;
             var line = lineObject.text;
             if(javaFlag){
                 lineObject.mark = 1;
@@ -134,6 +136,7 @@ app.controller('AppController', function($http, $location, $window, $mdToast) {
             if(line.indexOf('[STDOUT]')!= -1 && crashFlag){
                 lineObject.mark = 1;
             }
+            lineNum++;
         });
         console.log(lines);
         console.log(vm.launcherBuild);
