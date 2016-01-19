@@ -12,7 +12,7 @@ app.config(
     }
 );
 
-app.controller('AppController', function($http, $location, $window, $mdToast) {
+app.controller('AppController', function($http, $location, $window, $mdToast, $log) {
     var vm = this;
     vm.uploader = true;
     vm.file = {
@@ -21,17 +21,15 @@ app.controller('AppController', function($http, $location, $window, $mdToast) {
     };
     var url = $location.absUrl();
     if(url.indexOf('?log=')!=-1){
-        console.log('External log detected');
+        $log.info('External log detected');
         var log = url.substr(url.indexOf('?log=')+5);
-        console.log(log);
         $http.get('http://bochen415.info/loggify.php?url='+log).then(function (res) {
-            console.log(res.data);
             readFile(res.data);
         });
     }
 
-    $http.get('./indicators.json').then(function (res) {
-        console.log(res);
+    $http.get('./resources/indicators.json').then(function (res) {
+        $log.debug(res);
     });
 
     $window.Dropzone.options.upload = {
