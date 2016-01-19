@@ -13,7 +13,7 @@ app.config(
 );
 
 app.controller('AppController', function($http, $location, $window, $mdToast, $log) {
-    var vm = this;
+    var vm = this, fileText;
     vm.uploader = true;
     vm.file = {
         index: [],
@@ -27,7 +27,7 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
 
     $window.Dropzone.options.upload = {
         accept: function (file, done) {
-            console.log(file);
+            $log.debug(file);
             if(file.name.indexOf('.log')!= -1){
                 var reader = new FileReader;
                 reader.readAsText(file);
@@ -52,8 +52,48 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
         }
     }
 
+    function readSystemInfo(){
+        var system = [];
+        system.launcherInfo = {};
+        system.launcherInfo.name = "Launcher Build";
+        system.launcherInfo.content = fileText.substr(fileText.indexOf('[')+3, fileText.indexOf(']')-3);
+        _.split(fileText, /\n/).forEach(function (line) {
+            if(line.indexOf('OS:')!= -1){
+                system.osInfo = {};
+                system.osInfo.name = "Operating System";
+                system.osInfo.content = line.substr(line.indexOf('OS:')+4);
+            }
+            if(line.indexOf('Xmx')!= -1){
+                system.ramInfo = {};
+                system.ramInfo.name = 'Alllocated RAM';
+                system.ramInfo.content = line.substr(line.indexOf('Xmx')+3,4);
+            }
+            if(line.indexOf('jre')!= -1){
+                system.javaInfo = {};
+                system.javaInfo.name = "JRE";
+                var jrePath = line.substr(line.indexOf('jre'));
+                if(jrePath.indexOf('\\')!=-1){
+                    system.javaInfo.content = jrePath.substr(0, jrePath.indexOf('\\'));
+                } else {
+                    system.javaInfo.content = jrePath;
+                }
+
+            }
+            if(line.indexOf('modpacks')!= -1){
+                system.packInfo = {};
+                system.packInfo.name = "Detected modpack";
+                var packPath = line.substr(line.indexOf('modpacks')+9);
+                system.packInfo.content = packPath.substr(0, packPath.indexOf('\\'));
+            }
+        });
+        vm.systemInfo = system;
+        $log.debug(system);
+    }
+
     function readFile (text) {
         vm.uploader = false;
+        fileText = angular.copy(text);
+        readSystemInfo();
         var file = angular.copy(text);
         var lines;
         lines = _.split(file, /\n/);
@@ -94,7 +134,6 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
             }
             if(line.indexOf('modpacks')!= -1){
                 var packPath = line.substr(line.indexOf('modpacks')+9);
-                console.log(packPath);
                 vm.pack = packPath.substr(0, packPath.indexOf('\\'));
             }
             if(line.indexOf('jre')!= -1){
@@ -142,9 +181,6 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
             }
             lineNum++;
         });
-        console.log(lines);
-        console.log(vm.launcherBuild);
-        console.log(sortedLines);
         vm.launches = launch;
         vm.latest = sortedLines[launch];
         vm.loaded = true;
