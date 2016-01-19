@@ -19,14 +19,7 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
         index: [],
         content: []
     };
-    var url = $location.absUrl();
-    if(url.indexOf('?log=')!=-1){
-        $log.info('External log detected');
-        var log = url.substr(url.indexOf('?log=')+5);
-        $http.get('http://bochen415.info/loggify.php?url='+log).then(function (res) {
-            readFile(res.data);
-        });
-    }
+    checkForExternalLog();
 
     $http.get('./resources/indicators.json').then(function (res) {
         $log.debug(res);
@@ -47,6 +40,17 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
             }
         }
     };
+
+    function checkForExternalLog(){
+        var url = $location.absUrl();
+        if(url.indexOf('?log=')!=-1){
+            $log.info('External log detected');
+            var log = url.substr(url.indexOf('?log=')+5);
+            $http.get('http://bochen415.info/loggify.php?url='+log).then(function (res) {
+                readFile(res.data);
+            });
+        }
+    }
 
     function readFile (text) {
         vm.uploader = false;
