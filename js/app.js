@@ -1,7 +1,7 @@
 /**
  * Created by Lukas on 15.01.2016.
  */
-var app = angular.module('how2', ['ngMaterial']);
+var app = angular.module('loggify', ['ngMaterial']);
 
 app.config(
     function($mdThemingProvider) {
@@ -14,9 +14,7 @@ app.config(
 
 app.controller('AppController', function($http, $location, $window, $mdToast) {
     var vm = this;
-    vm.loaded = false;
     vm.uploader = true;
-    vm.readFile = readFile;
     vm.file = {
         index: [],
         content: []
@@ -31,6 +29,10 @@ app.controller('AppController', function($http, $location, $window, $mdToast) {
             readFile(res.data);
         });
     }
+
+    $http.get('./indicators.json').then(function (res) {
+        console.log(res);
+    });
 
     $window.Dropzone.options.upload = {
         accept: function (file, done) {
@@ -154,29 +156,4 @@ app.controller('AppController', function($http, $location, $window, $mdToast) {
             }
         })
     }
-});
-
-app.directive('onReadFile', function ($parse) {
-    return {
-        restrict: 'A',
-        scope: false,
-        link: function(scope, element, attrs) {
-            var fn = $parse(attrs.onReadFile);
-
-            element.on('change', function(onChangeEvent) {
-                var reader = new FileReader();
-
-                reader.onload = function(onLoadEvent) {
-                    scope.$apply(function() {
-                        fn(scope, {$fileContent:onLoadEvent.target});
-                    });
-                };
-
-                reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
-                console.log((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
-                console.log(reader);
-                reader.file=(onChangeEvent.srcElement || onChangeEvent.target).files[0];
-            });
-        }
-    };
 });
