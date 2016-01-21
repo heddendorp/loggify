@@ -12,17 +12,25 @@ app.config(
     }
 );
 
-app.controller('AppController', function($http, $location, $window, $mdToast, $log) {
-    var vm = this, fileText;
+app.controller('AppController', function($http, $location, $window, $mdToast, $log, $anchorScroll) {
+    var vm = this, fileText, latestLaunch, indicators;
     vm.uploader = true;
+    var issues = {};
     vm.file = {
         index: [],
         content: []
     };
+
+    vm.scroll = function (line) {
+        $location.hash(line);
+        $anchorScroll();
+    };
+
     checkForExternalLog();
 
     $http.get('./resources/indicators.json').then(function (res) {
         $log.debug(res);
+        indicators = res.data;
     });
 
     $window.Dropzone.options.upload = {
@@ -53,7 +61,7 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
     }
 
     function readSystemInfo(){
-        var system = [];
+        var system = {};
         system.launcherInfo = {};
         system.launcherInfo.name = "Launcher Build";
         system.launcherInfo.content = fileText.substr(fileText.indexOf('[')+3, fileText.indexOf(']')-3);
@@ -83,17 +91,84 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
                 system.packInfo = {};
                 system.packInfo.name = "Detected modpack";
                 var packPath = line.substr(line.indexOf('modpacks')+9);
-                system.packInfo.content = packPath.substr(0, packPath.indexOf('\\'));
+                if(packPath.indexOf("\\") != -1)
+                    system.packInfo.content = packPath.substr(0, packPath.indexOf("\\"));
+                else
+                    system.packInfo.content = packPath.substr(0, packPath.indexOf("/"));
+
             }
         });
         vm.systemInfo = system;
-        $log.debug(system);
     }
+
+    function prepareLog() {
+        var noLauncher = fileText.replace(new RegExp("\\[B#"+vm.systemInfo.launcherInfo.content+"] ","g"), "");
+        $log.debug(new RegExp("\[B#"+vm.systemInfo.launcherInfo.content+"]","g"));
+        $log.warn("[B#"+vm.systemInfo.launcherInfo.content+"] ");
+        var launches = _.split(noLauncher, 'Forge Mod Loader version');
+        vm.systemInfo.lauchInfo = {
+            name: "Mincraft Launches",
+            content: launches.length
+        };
+        latestLaunch = launches[launches.length-1];
+        var lines = _.split(launches[launches.length-1], /\n/);
+        if(launches.length>1)
+            lines.shift();
+        var prettyLines = [];
+        var count = 1;
+        lines.forEach(function(line){
+            var prettyLine = {};
+            prettyLine.content = line.substr(10);
+            prettyLine.num = count;
+            if(prettyLine.content != ""){
+                prettyLines.push(prettyLine);
+                count++;
+            }
+        });
+        vm.prettyLines = prettyLines;
+        findIssues();
+    }
+
+    function findIssues(){
+        vm.prettyLines.forEach(function (line) {
+            indicators.forEach(function (indicator) {
+                if(line.content.indexOf(indicator.requirements[0])!=-1){
+                    if(indicator.requirements[0][1]){
+                        var correct = true;
+                        indicator.requirements[0].forEach(function (req) {
+                            if(latestLaunch.indexOf(req)==-1)
+                            correct = false;
+                        });
+                        if(correct){
+                            issues[indicator.reason] ={
+                                reason: indicator.reason,
+                                fix: indicator.reply,
+                                line: line.num
+                            };
+                            line.mark = true;
+                        }
+                    } else {
+                        issues[indicator.reason] ={
+                            reason: indicator.reason,
+                            fix: indicator.reply,
+                            line: line.num
+                        };
+                        line.mark=true;
+                    }
+                }
+            })
+        });
+        vm.issues = issues;
+        $log.debug(issues);
+    }
+
 
     function readFile (text) {
         vm.uploader = false;
         fileText = angular.copy(text);
         readSystemInfo();
+        prepareLog();
+        $log.debug(vm.systemInfo);
         var file = angular.copy(text);
         var lines;
         lines = _.split(file, /\n/);
@@ -181,6 +256,7 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
             }
             lineNum++;
         });
+        vm.pack = vm.systemInfo.packInfo.content;
         vm.launches = launch;
         vm.latest = sortedLines[launch];
         vm.loaded = true;

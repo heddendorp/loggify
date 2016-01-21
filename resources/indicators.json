@@ -39,7 +39,6 @@
     "reason": "32bit Java",
     "requirements": [
       [
-        "C:\\Program Files (x86)\\Java\\",
         "C:\\Program Files (x86)\\Java\\"
       ]
     ],

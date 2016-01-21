@@ -27,74 +27,76 @@
 </md-toolbar>
 <md-content layout="column" flex layout-padding>
     <div>
-        This project is an early ßeta and not yet for public use!
+        This project is in ßeta, please forgive any missed bugs!
        <div ng-if="!vm.hideForm">
-           <br><br>
-           <h1>Select a Log-File for analysis</h1>
+           <h1 ng-if="vm.uploader">Select a Log-File for analysis</h1>
+           <h1 ng-if="!vm.uploader">Your Analysis</h1>
            <form ng-if="vm.uploader" action="/file-upload"
                  class="dropzone"
                  id="upload"></form>
        </div>
     </div>
     <div layout="column" ng-if="vm.loaded">
-        <div layout-gt-md="row" layout="column">
-            <md-card>
-                <md-card-title>
-                    <md-card-title-text>
-                        <span class="md-headline">System Info</span>
-                    </md-card-title-text>
-                </md-card-title>
-                <md-card-content style="padding-top: 16px;" layout-wrap layout="column">
-                    <div layout="column" layout-padding>
-                            <span>Launcher Build: {{vm.launcherBuild}} <br>
-                                MC-Runs detected: {{vm.launches}} <br>
-                                RAM: {{vm.ram}} <md-icon ng-if="vm.ramC<3000" class="crash">warning</md-icon><br>
-                                Modpack: {{vm.pack}} <br>
-                                Java: {{vm.jre}} <br>
-                                Operating System: {{vm.os}}</span>
-                        <span ng-if="vm.javaError">Possible Java-Error: <br><span class="logs">{{vm.javaError[0]}}<br>{{vm.javaError[1]}}</span></span>
-                        <span ng-if="vm.falseJava">Program Files (x86) detected!</span>
-                        <span ng-if="vm.notAcc">Possibly Windows 10 + old device or outdated/broken graphics driver</span>
-                        <span ng-if="vm.crack">Possible cracked launcher!</span>
-                        <span ng-if="vm.cause">Attention: <br><span class="logs">{{vm.cause}}</span></span>
-                    </div>
-                </md-card-content>
-            </md-card>
-            <md-card>
-                <img ng-src="{{vm.packInfo.background.url}}" class="md-card-image" alt="{{vm.packInfo.displayName}}" style="max-width: 260px;">
-                <md-card-title>
-                    <md-card-title-text>
-                        <span class="md-headline">{{vm.packInfo.displayName}}</span>
-                    </md-card-title-text>
-                </md-card-title>
-                <md-card-content style="padding-top: 16px;" layout-wrap layout="column">
-                    <p>
-                        Made by: {{vm.packInfo.user}}<br>
+        <div layout="row">
+                <md-card flex="25">
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">System Info</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content style="padding-top: 16px;" layout-wrap layout="column">
+                        <div layout="column" layout-padding>
+                            <div ng-repeat="info in vm.systemInfo" layout="row">
+                                <span flex="50">{{info.name}}</span>
+                                <span flex>{{info.content}}</span>
+                            </div>
+                            <md-divider></md-divider>
+                            <div ng-repeat="issue in vm.issues" layout="row" ng-click="vm.scroll(issue.line)">
+                                <span>{{issue.reason}}</span>
+                            </div>
+                            <!--<span ng-if="vm.javaError">Possible Java-Error: <br><span class="logs">{{vm.javaError[0]}}<br>{{vm.javaError[1]}}</span></span>
+                            <span ng-if="vm.falseJava">Program Files (x86) detected!</span>
+                            <span ng-if="vm.notAcc">Possibly Windows 10 + old device or outdated/broken graphics driver</span>
+                            <span ng-if="vm.crack">Possible cracked launcher!</span>
+                            <span ng-if="vm.cause">Attention: <br><span class="logs">{{vm.cause}}</span></span>-->
+                        </div>
+                    </md-card-content>
+                </md-card>
+                <md-card>
+                    <img ng-src="{{vm.packInfo.background.url}}" class="md-card-image" alt="{{vm.packInfo.displayName}}" style="max-width: 260px;">
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{vm.packInfo.displayName}}</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content style="padding-top: 16px;" layout-wrap layout="column">
+                        <p>
+                            Made by: {{vm.packInfo.user}}<br>
                        <span ng-if="vm.packInfo.solderD">
                            Recommended build: {{vm.packInfo.solderD.recommended}}<br>
                        Latest build: {{vm.packInfo.solderD.latest}}
                        </span>
-                    </p>
-                </md-card-content>
-                <md-card-actions layout="row" layout-align="end center">
-                    <md-button href="{{vm.packInfo.platformUrl}}" target="_blank">Got to Platform-page</md-button>
-                </md-card-actions>
-            </md-card>
-            <md-card flex>
-                <md-card-title>
-                    <md-card-title-text>
-                        <span class="md-headline">Ideas, Problems & Suggestions</span>
-                    </md-card-title-text>
-                </md-card-title>
-                <md-card-content style="padding-top: 16px;" layout-wrap layout="column">
-                    <p>
-                        This project is still quite WIP, but open for contributions and suggestions, just head over to the Github repo and feel free to copy, fork ans contribute.
-                    </p>
-                </md-card-content>
-                <md-card-actions layout="row" layout-align="end center">
-                    <md-button href="https://github.com/Isigiel/loggify" target="_blank">Visit Github</md-button>
-                </md-card-actions>
-            </md-card>
+                        </p>
+                    </md-card-content>
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button href="{{vm.packInfo.platformUrl}}" target="_blank">Got to Platform-page</md-button>
+                    </md-card-actions>
+                </md-card>
+                <md-card flex>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">Ideas, Problems & Suggestions</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content style="padding-top: 16px;" layout-wrap layout="column">
+                        <p>
+                            This project is still quite WIP, but open for contributions and suggestions, just head over to the Github repo and feel free to copy, fork ans contribute.
+                        </p>
+                    </md-card-content>
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button href="https://github.com/Isigiel/loggify" target="_blank">Visit Github</md-button>
+                    </md-card-actions>
+                </md-card>
         </div>
         <md-card>
             <md-card-title>
@@ -104,7 +106,11 @@
             </md-card-title>
             <md-card-content style="padding-top: 16px;" layout-wrap layout="column" class="logs">
 
-                <span ng-repeat="line in vm.latest track by $index" ng-class="{ crash:line.mark==1, crack:line.mark==2, low:line.mark==3, warn:line.mark==4}">{{line.text}}</span>
+                <!--<span ng-repeat="line in vm.latest track by $index" ng-class="{ crash:line.mark==1, crack:line.mark==2, low:line.mark==3, warn:line.mark==4}">{{line.text}}</span>-->
+                <div ng-repeat="line in vm.prettyLines" layout="row">
+                    <span style="width: 40px;" id="{{line.num}}">{{line.num}}</span>
+                    <span flex ng-class="{ crash:line.mark}">{{line.content}}</span>
+                </div>
 
             </md-card-content>
         </md-card>
@@ -120,6 +126,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
+<script src="http://momentjs.com/downloads/moment.js"></script>
 <script src="js/dropzone.js"></script>
 
 <!-- Angular Material Library -->
