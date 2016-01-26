@@ -97,7 +97,24 @@ app.controller('AppController', function($http, $location, $window, $mdToast, $l
                     system.packInfo.content = packPath.substr(0, packPath.indexOf("/"));
 
             }
+            if(line.indexOf('--username')!= -1){
+                var croppedLine = line.substr(line.indexOf('--username')+11);
+                system.userInfo = {};
+                system.userInfo.name = 'Found username';
+                system.userInfo.content = croppedLine.substr(0, croppedLine.indexOf('--')-1);
+            }
+            if(line.indexOf('--uuid')!= -1){
+                var croppedLine = line.substr(line.indexOf('--uuid')+11);
+                system.uuidInfo = {};
+                system.uuidInfo.name = 'Found UUID';
+                system.uuidInfo.content = croppedLine.substr(0, croppedLine.indexOf('--'));
+            }
         });
+        if(system.userInfo){
+            $http.get('http://axis.iaero.me/accstatus?username='+system.userInfo.content+'&format=json').then(function (res) {
+                system.userInfo.status = res.data.data;
+            })
+        }
         vm.systemInfo = system;
     }
 

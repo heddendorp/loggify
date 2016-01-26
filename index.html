@@ -48,7 +48,7 @@
                         <div layout="column" layout-padding>
                             <div ng-repeat="info in vm.systemInfo" layout="row">
                                 <span flex="50">{{info.name}}</span>
-                                <span flex>{{info.content}}</span>
+                                <span flex>{{info.content}} <md-icon class="verified" ng-if="info.status.premium">verified_user</md-icon><md-icon class="crash" ng-if="!info.status.premium && info.status">warning</md-icon></span>
                             </div>
                             <md-divider></md-divider>
                             <div ng-repeat="issue in vm.issues" layout="row" ng-click="vm.scroll(issue.line)">
